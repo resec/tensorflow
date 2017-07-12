@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import org.tensorflow.DataType;
@@ -315,6 +316,15 @@ public class TensorFlowInferenceInterface {
    * dst} must have length greater than or equal to that of the source Tensor. This operation will
    * not affect dst's content past the source Tensor's size.
    */
+  public void fetch(String outputName, long[] dst) {
+    fetch(outputName, LongBuffer.wrap(dst));
+  }
+
+  /**
+   * Read from a Tensor named {@link outputName} and copy the contents into a Java array. {@link
+   * dst} must have length greater than or equal to that of the source Tensor. This operation will
+   * not affect dst's content past the source Tensor's size.
+   */
   public void fetch(String outputName, double[] dst) {
     fetch(outputName, DoubleBuffer.wrap(dst));
   }
@@ -345,6 +355,16 @@ public class TensorFlowInferenceInterface {
    * source Tensor's size.
    */
   public void fetch(String outputName, IntBuffer dst) {
+    getTensor(outputName).writeTo(dst);
+  }
+
+  /**
+   * Read from a Tensor named {@link outputName} and copy the contents into the <b>direct</b> and
+   * <b>native ordered</b> java.nio buffer {@link dst}. {@link dst} must have capacity greater than
+   * or equal to that of the source Tensor. This operation will not affect dst's content past the
+   * source Tensor's size.
+   */
+  public void fetch(String outputName, LongBuffer dst) {
     getTensor(outputName).writeTo(dst);
   }
 
