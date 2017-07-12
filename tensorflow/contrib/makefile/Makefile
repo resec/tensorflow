@@ -232,24 +232,148 @@ ifeq ($(TARGET),ANDROID)
 	ifndef NDK_ROOT
     $(error "NDK_ROOT is not defined.")
 	endif
-	CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/bin/arm-linux-androideabi-g++
-	CXXFLAGS +=\
---sysroot $(NDK_ROOT)/platforms/android-21/arch-arm \
+
+	CXXFLAGS += \
 -Wno-narrowing \
--march=armv7-a \
--mfloat-abi=softfp \
--mfpu=neon \
+-DSELECTIVE_REGISTRATION \
 -fPIE
 
-	INCLUDES = \
+	INCLUDES := \
 -I$(NDK_ROOT)/sources/android/support/include \
--I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/include \
--I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi/include \
+-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/include
+
+	ifeq ($(ANDROID_ARCH),ARMV5)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/bin/arm-linux-androideabi-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-arm \
+		-march=armv5te -mtune=xscale -msoft-float
+
+		INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_armeabi/include
+
+		LD := $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/arm-linux-androideabi/bin/ld
+		LDFLAGS := \
+		-march=armv5te \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_armeabi/lib
+
+		AR := $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/bin/arm-linux-androideabi-ar
+	endif
+	ifeq ($(ANDROID_ARCH),ARMV7)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/bin/arm-linux-androideabi-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-arm \
+		-march=armv7-a -mfloat-abi=softfp -mfpu=neon
+
+    INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_armeabi-v7a/include
+
+		LD := $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/arm-linux-androideabi/bin/ld
+		LDFLAGS := \
+		-march=armv7-a \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_armeabi-v7a/lib
+
+		AR := $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/bin/arm-linux-androideabi-ar
+	endif
+	ifeq ($(ANDROID_ARCH),ARM64)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/aarch64-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/bin/aarch64-linux-android-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-arm64 \
+		-march=armv8-a
+
+		INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_arm64-v8a/include
+
+		LD := $(NDK_ROOT)/toolchains/aarch64-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/aarch64-linux-android/bin/ld
+		LDFLAGS := \
+		-march=armv8-a \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_arm64-v8a/lib
+
+		AR := $(NDK_ROOT)/toolchains/aarch64-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/bin/aarch64-linux-android-ar
+	endif
+	ifeq ($(ANDROID_ARCH),X86)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/x86-4.9/prebuilt/$(OS_PATH)-x86_64/bin/i686-linux-android-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-x86 \
+		-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32
+
+		INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_x86/include
+
+		LD := $(NDK_ROOT)/toolchains/x86-4.9/prebuilt/$(OS_PATH)-x86_64/i686-linux-android/bin/ld
+		LDFLAGS := \
+		-march=i686 \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86 \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_x86/lib
+
+		AR := $(NDK_ROOT)/toolchains/x86-4.9/prebuilt/$(OS_PATH)-x86_64/bin/i686-linux-android-ar
+	endif
+	ifeq ($(ANDROID_ARCH),X86_64)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/x86_64-4.9/prebuilt/$(OS_PATH)-x86_64/bin/x86_64-linux-android-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-x86_64 \
+		-march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel
+
+		INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86_64/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_x86_64/include
+
+		LD := $(NDK_ROOT)/toolchains/x86_64-4.9/prebuilt/$(OS_PATH)-x86_64/x86_64-linux-android/bin/ld
+		LDFLAGS := \
+		-march=x86-64 \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86_64 \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_x86_64/lib
+
+		AR := $(NDK_ROOT)/toolchains/x86_64-4.9/prebuilt/$(OS_PATH)-x86_64/bin/x86_64-linux-android-ar
+	endif
+	ifeq ($(ANDROID_ARCH),MIPS)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/mipsel-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/bin/mipsel-linux-android-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-mips \
+		-march=mips32r5
+
+		INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/mips/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_mips/include
+
+		LD := $(NDK_ROOT)/toolchains/mipsel-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/mipsel-linux-android/bin/ld
+		LDFLAGS := \
+		-march=mips32r5 \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/mips \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_mips/lib
+
+		AR := $(NDK_ROOT)/toolchains/mipsel-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/bin/mipsel-linux-android-ar
+	endif
+	ifeq ($(ANDROID_ARCH),MIPS64)
+		CXX := $(CC_PREFIX) $(NDK_ROOT)/toolchains/mips64el-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/bin/mips64el-linux-android-g++
+		CXXFLAGS += \
+		--sysroot $(NDK_ROOT)/platforms/android-21/arch-mips64 \
+		-march=mips64r6
+
+		INCLUDES += \
+		-I$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/mips64/include \
+		-I$(MAKEFILE_DIR)/gen/protobuf_android/android_mips64/include
+
+		LD := $(NDK_ROOT)/toolchains/mips64el-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/mips64el-linux-android/bin/ld
+		LDFLAGS := \
+		-march=mips64r6 \
+		-L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/mips64 \
+		-L$(MAKEFILE_DIR)/gen/protobuf_android/android_mips64/lib
+
+		AR := $(NDK_ROOT)/toolchains/mips64el-linux-android-4.9/prebuilt/$(OS_PATH)-x86_64/bin/mips64el-linux-android-ar
+	endif
+
+	INCLUDES += \
 -I. \
 -I$(MAKEFILE_DIR)/downloads/ \
 -I$(MAKEFILE_DIR)/downloads/eigen \
 -I$(MAKEFILE_DIR)/downloads/gemmlowp \
--I$(MAKEFILE_DIR)/gen/protobuf/include \
 -I$(PROTOGENDIR) \
 -I$(PBTGENDIR)
 
@@ -260,17 +384,8 @@ ifeq ($(TARGET),ANDROID)
 -lz \
 -lm
 
-	LD := $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/arm-linux-androideabi/bin/ld
+	LDFLAGS += -fPIE -pie -v
 
-	LDFLAGS := \
--march=armv7-a \
--L$(MAKEFILE_DIR)/gen/protobuf/lib \
--L$(NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a \
--fPIE \
--pie \
--v
-
-	AR := $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.9/prebuilt/$(OS_PATH)-x86_64/bin/arm-linux-androideabi-ar
 	ARFLAGS := r
 	LIBFLAGS += -Wl,--allow-multiple-definition -Wl,--whole-archive
 
@@ -295,6 +410,10 @@ ifeq ($(TARGET),ANDROID)
 		CXXFLAGS += -DENABLE_EXPERIMENTAL_HEXNN_OPS
 	endif
 
+	OBJDIR := $(OBJDIR)android_$(ANDROID_ARCH)/
+	LIBDIR := $(LIBDIR)android_$(ANDROID_ARCH)/
+	BINDIR := $(BINDIR)android_$(ANDROID_ARCH)/
+	DEPDIR := $(DEPDIR)android_$(ANDROID_ARCH)/
 endif  # ANDROID
 # LINT.ThenChange(//tensorflow/contrib/android/cmake/CMakeLists.txt)
 
@@ -624,7 +743,7 @@ clean:
 # Gets rid of all generated files except protobuf libs generated
 # before calling make.  This allows users not to recompile proto libs everytime.
 clean_except_protobuf_libs:
-	find $(MAKEFILE_DIR)/gen -mindepth 1 -maxdepth 1 ! -name "protobuf" ! -name "protobuf-host" -exec rm -r "{}" \;
+	find $(MAKEFILE_DIR)/gen -mindepth 1 -maxdepth 1 ! -name "protobuf*" -exec rm -r "{}" \;
 	rm -rf tensorflow/core/util/version_info.cc
 
 # Gets rid of target files only, leaving the host alone. Also leaves the lib

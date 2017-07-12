@@ -71,7 +71,7 @@ then
     exit 1
 fi
 
-GENDIR="$(pwd)/gen/protobuf"
+GENDIR="$(pwd)/gen/protobuf_android"
 HOST_GENDIR="$(pwd)/gen/protobuf-host"
 mkdir -p "${GENDIR}"
 mkdir -p "${HOST_GENDIR}"
@@ -153,7 +153,7 @@ then
   exit 1
 fi
 
-./configure --prefix="${GENDIR}" \
+./configure --prefix="${GENDIR}/android_${ARCHITECTURE}" \
 --host="${bin_prefix}" \
 --with-sysroot="${SYSROOT}" \
 --disable-shared \
