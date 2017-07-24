@@ -227,6 +227,7 @@ cc_library(
         "//tensorflow/compiler/xla:util",
         "//tensorflow/compiler/xla:xla_data_proto",
         "//tensorflow/compiler/xla/service:hlo",
+        "//tensorflow/compiler/xla/service:hlo_module_config",
         "//tensorflow/compiler/xla/service/llvm_ir:ir_array",
         "//tensorflow/compiler/xla/service/llvm_ir:llvm_loop",
         "//tensorflow/compiler/xla/service/llvm_ir:llvm_util",
@@ -304,6 +305,7 @@ cc_library(
     hdrs = ["cpu_runtime_sse4_1.h"],
     copts = ["-DEIGEN_AVOID_STL_ARRAY"],
     deps = [
+        ":cpu_runtime",
         "//tensorflow/core:lib",
         "//third_party/eigen3",
     ],
@@ -316,6 +318,7 @@ cc_library(
     hdrs = ["cpu_runtime_avx.h"],
     copts = ["-DEIGEN_AVOID_STL_ARRAY"],
     deps = [
+        ":cpu_runtime",
         "//tensorflow/core:lib",
         "//third_party/eigen3",
     ],
@@ -334,7 +337,11 @@ cc_library(
     ],
     copts = runtime_copts(),
     deps = [
+        "//tensorflow/compiler/xla:shape_util",
+        "//tensorflow/compiler/xla:statusor",
         "//tensorflow/compiler/xla:types",
+        "//tensorflow/compiler/xla:xla_data_proto",
+        "//tensorflow/compiler/xla/service/llvm_ir:llvm_util",
         "//tensorflow/core:lib",
     ],
 )
@@ -349,11 +356,13 @@ cc_library(
     copts = runtime_copts(),
     visibility = ["//visibility:public"],
     deps = [
+        ":cpu_runtime",
         "//tensorflow/compiler/xla:executable_run_options",
         "//tensorflow/core:framework_lite",
         "//tensorflow/core/kernels:eigen_helpers",
         "//third_party/eigen3",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -363,10 +372,12 @@ cc_library(
     copts = runtime_copts(),
     visibility = ["//visibility:public"],
     deps = [
+        ":cpu_runtime",
         "//tensorflow/compiler/xla:executable_run_options",
         "//tensorflow/core:framework_lite",
         "//third_party/eigen3",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -379,10 +390,12 @@ cc_library(
     copts = runtime_copts(),
     visibility = ["//visibility:public"],
     deps = [
+        ":cpu_runtime",
         "//tensorflow/core:framework_lite",
         "//tensorflow/core/kernels:eigen_helpers",
         "//third_party/eigen3",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -392,9 +405,11 @@ cc_library(
     copts = runtime_copts(),
     visibility = ["//visibility:public"],
     deps = [
+        ":cpu_runtime",
         "//tensorflow/core:framework_lite",
         "//third_party/eigen3",
     ],
+    alwayslink = True,
 )
 
 cc_test(
@@ -447,6 +462,7 @@ cc_library(
         ":ir_emission_utils",
         ":shape_partition",
         "//tensorflow/compiler/xla:types",
+        "//tensorflow/compiler/xla:util",
         "//tensorflow/compiler/xla/service:hlo",
         "//tensorflow/compiler/xla/service:hlo_cost_analysis",
         "//tensorflow/compiler/xla/service:hlo_pass",
@@ -531,7 +547,7 @@ cc_library(
     srcs = ["shape_partition.cc"],
     hdrs = ["shape_partition.h"],
     deps = [
-        "//tensorflow/compiler/xla/service:hlo",
+        "//tensorflow/compiler/xla:shape_util",
     ],
 )
 

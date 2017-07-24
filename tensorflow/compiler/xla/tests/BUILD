@@ -26,6 +26,7 @@ filegroup(
 
 load("//tensorflow/compiler/xla:xla.bzl", "export_dynamic_linkopts")
 load("//tensorflow/compiler/xla/tests:build_defs.bzl", "xla_test")
+load("//tensorflow/compiler/xla/tests:build_defs.bzl", "xla_test_library")
 load("//tensorflow/compiler/xla/tests:build_defs.bzl", "generate_backend_suites")
 load("//tensorflow/compiler/xla/tests:build_defs.bzl", "generate_backend_test_macros")
 
@@ -726,6 +727,7 @@ xla_test(
     srcs = ["batch_normalization_test.cc"],
     shard_count = 40,
     deps = [
+        ":test_utils",
         "//tensorflow/compiler/xla:array2d",
         "//tensorflow/compiler/xla:array4d",
         "//tensorflow/compiler/xla:literal_util",
@@ -733,7 +735,9 @@ xla_test(
         "//tensorflow/compiler/xla:shape_util",
         "//tensorflow/compiler/xla:status_macros",
         "//tensorflow/compiler/xla:statusor",
+        "//tensorflow/compiler/xla:test",
         "//tensorflow/compiler/xla:test_helpers",
+        "//tensorflow/compiler/xla:util",
         "//tensorflow/compiler/xla:xla_data_proto",
         "//tensorflow/compiler/xla/client:computation",
         "//tensorflow/compiler/xla/client:computation_builder",
@@ -741,6 +745,7 @@ xla_test(
         "//tensorflow/compiler/xla/client:local_client",
         "//tensorflow/compiler/xla/client/lib:arithmetic",
         "//tensorflow/compiler/xla/legacy_flags:debug_options_flags",
+        "//tensorflow/compiler/xla/service:hlo",
         "//tensorflow/compiler/xla/tests:client_library_test_base",
         "//tensorflow/compiler/xla/tests:hlo_test_base",
         "//tensorflow/compiler/xla/tests:literal_test_util",
@@ -872,11 +877,11 @@ xla_test(
     ],
 )
 
-# Note that the backend-specific macros (e.g. DISABLED_ON_CPU) would not work here, because the
-# library does not get recompiled for each backend.
-cc_library(
+# External xla_test targets can add "reduce_window_test_library" to xla_test_library_deps, in order
+# to refer to the cc_library compiled with the correct backend macros. The following test target
+# "reduce_window_test" is an example.
+xla_test_library(
     name = "reduce_window_test_library",
-    testonly = 1,
     srcs = ["reduce_window_test.cc"],
     deps = [
         ":test_macros_header",
@@ -902,9 +907,8 @@ xla_test(
     name = "reduce_window_test",
     timeout = "long",
     srcs = [],
-    deps = [
-        ":reduce_window_test_library",
-    ],
+    xla_test_library_deps = [":reduce_window_test_library"],
+    deps = [],
 )
 
 xla_test(

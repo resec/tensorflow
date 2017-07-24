@@ -3852,12 +3852,14 @@ op {
         type: DT_INT32
         type: DT_UINT8
         type: DT_UINT16
-        type: DT_INT16
         type: DT_INT8
+        type: DT_INT16
         type: DT_COMPLEX64
         type: DT_COMPLEX128
         type: DT_QINT8
         type: DT_QUINT8
+        type: DT_QINT16
+        type: DT_QUINT16
         type: DT_QINT32
         type: DT_HALF
       }
@@ -3874,12 +3876,14 @@ op {
         type: DT_INT32
         type: DT_UINT8
         type: DT_UINT16
-        type: DT_INT16
         type: DT_INT8
+        type: DT_INT16
         type: DT_COMPLEX64
         type: DT_COMPLEX128
         type: DT_QINT8
         type: DT_QUINT8
+        type: DT_QINT16
+        type: DT_QUINT16
         type: DT_QINT32
         type: DT_HALF
       }
@@ -10568,6 +10572,41 @@ op {
   is_stateful: true
 }
 op {
+  name: "IteratorFromStringHandle"
+  input_arg {
+    name: "string_handle"
+    description: "A string representation of the given handle."
+    type: DT_STRING
+  }
+  output_arg {
+    name: "resource_handle"
+    description: "A handle to an iterator resource."
+    type: DT_RESOURCE
+  }
+  attr {
+    name: "output_types"
+    type: "list(type)"
+    default_value {
+      list {
+      }
+    }
+    description: "If specified, defines the type of each tuple component in an\nelement produced by the resulting iterator."
+    has_minimum: true
+  }
+  attr {
+    name: "output_shapes"
+    type: "list(shape)"
+    default_value {
+      list {
+      }
+    }
+    description: "If specified, defines the shape of each tuple component in an\nelement produced by the resulting iterator."
+    has_minimum: true
+  }
+  summary: "Converts the given string representing a handle to an iterator to a resource."
+  is_stateful: true
+}
+op {
   name: "IteratorGetNext"
   input_arg {
     name: "iterator"
@@ -10590,6 +10629,21 @@ op {
     minimum: 1
   }
   summary: "Gets the next output from the given iterator."
+  is_stateful: true
+}
+op {
+  name: "IteratorToStringHandle"
+  input_arg {
+    name: "resource_handle"
+    description: "A handle to an iterator resource."
+    type: DT_RESOURCE
+  }
+  output_arg {
+    name: "string_handle"
+    description: "A string representation of the given handle."
+    type: DT_STRING
+  }
+  summary: "Converts the given `resource_handle` representing an iterator to a string."
   is_stateful: true
 }
 op {
@@ -28434,33 +28488,6 @@ op {
   is_stateful: true
 }
 op {
-  name: "LMDBReader"
-  output_arg {
-    name: "reader_handle"
-    description: "The handle to reference the Reader."
-    type: DT_STRING
-    is_ref: true
-  }
-  attr {
-    name: "container"
-    type: "string"
-    default_value {
-      s: ""
-    }
-    description: "If non-empty, this reader is placed in the given container.\nOtherwise, a default container is used."
-  }
-  attr {
-    name: "shared_name"
-    type: "string"
-    default_value {
-      s: ""
-    }
-    description: "If non-empty, this reader is named in the given bucket\nwith this shared_name. Otherwise, the node name is used instead."
-  }
-  summary: "A Reader that outputs the records from a LMDB database."
-  is_stateful: true
-}
-op {
   name: "TakeDataset"
   input_arg {
     name: "input_dataset"
@@ -29744,6 +29771,11 @@ op {
     description: "A scalar or a vector containing the name(s) of the file(s) to be\nread."
     type: DT_STRING
   }
+  input_arg {
+    name: "compression_type"
+    description: "A scalar containing either (i) the empty string (no\ncompression), (ii) \"ZLIB\", or (iii) \"GZIP\"."
+    type: DT_STRING
+  }
   output_arg {
     name: "handle"
     type: DT_RESOURCE
@@ -30435,7 +30467,7 @@ op {
     }
   }
   summary: "Computes the Max along segments of a tensor."
-  description: "Read @{$math_ops#segmentation$the section on segmentation} for an explanation of\nsegments.\n\nThis operator is similar to the [unsorted segment sum operator](../../../api_docs/python/math_ops.md#UnsortedSegmentSum).\nInstead of computing the sum over segments, it computes the maximum\nsuch that:\n\n\\\\(output_i = \\max_j data_j\\\\) where max is over `j` such\nthat `segment_ids[j] == i`.\n\nIf the maximum is empty for a given segment ID `i`, it outputs the smallest possible value for specific numeric type,\n `output[i] = numeric_limits<T>::min()`.\n\n<div style=\"width:70%; margin:auto; margin-bottom:10px; margin-top:20px;\">\n<img style=\"width:100%\" src=\"https://www.tensorflow.org/images/UnsortedSegmentSum.png\" alt>\n</div>"
+  description: "Read @{$math_ops#segmentation$the section on segmentation} for an explanation of\nsegments.\n\nThis operator is similar to the [unsorted segment sum operator](../../../api_docs/python/math_ops.md#UnsortedSegmentSum).\nInstead of computing the sum over segments, it computes the maximum\nsuch that:\n\n\\\\(output_i = \\max_j data_j\\\\) where max is over `j` such\nthat `segment_ids[j] == i`.\n\nIf the maximum is empty for a given segment ID `i`, it outputs the smallest possible value for specific numeric type,\n `output[i] = numeric_limits<T>::min()`.\n\n<div style=\"width:70%; margin:auto; margin-bottom:10px; margin-top:20px;\">\n<img style=\"width:100%\" src=\"https://www.tensorflow.org/images/UnsortedSegmentMax.png\" alt>\n</div>"
 }
 op {
   name: "UnsortedSegmentSum"
@@ -30688,7 +30720,8 @@ op {
     description: "scalar. The content to be written to the output file."
     type: DT_STRING
   }
-  summary: "Writes contents to the file at input filename. Creates file if not existing."
+  summary: "Writes contents to the file at input filename. Creates file and recursively"
+  description: "creates directory if not existing."
 }
 op {
   name: "ZerosLike"

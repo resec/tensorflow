@@ -85,13 +85,17 @@ class XlaCompiler {
       // Argument is a compile-time constant. No associated runtime parameter.
       kConstant,
 
-      // Argument is a variable resource. Has an associated runtime parameter
+      // Argument is a Variable resource. Has an associated runtime parameter
       // iff `initialized` is true.
       kVariable,
 
       // Argument is a TensorArray resource. Has an associated runtime parameter
       // iff `initialized` is true.
       kTensorArray,
+
+      // Argument is a Stack resource. Has an associated runtime parameter
+      // iff `initialized` is true.
+      kStack,
 
       // Argument is a run-time parameter.
       kParameter,
@@ -297,7 +301,12 @@ class XlaCompiler {
   XlaCompilationDevice* device_;  // Owned by device_mgr_
   DeviceMgr device_mgr_;
 
-  std::unique_ptr<FunctionLibraryDefinition> flib_def_;
+  // To avoid copying the client's function library, use a local function
+  // library and runtime for functions created as part of the functionalize
+  // control flow transformation.
+  std::unique_ptr<FunctionLibraryDefinition> local_flib_def_;
+  std::unique_ptr<FunctionLibraryRuntime> local_flib_runtime_;
+
   std::unique_ptr<FunctionLibraryRuntime> flib_runtime_;
 
   struct SignatureHash {

@@ -233,6 +233,16 @@ public class TensorFlowInferenceInterface {
    * as many elements as that of the destination Tensor. If {@link src} has more elements than the
    * destination has capacity, the copy is truncated.
    */
+  public void feed(String inputName, long[] src, long... dims) {
+    addFeed(inputName, Tensor.create(dims, LongBuffer.wrap(src)));
+  }
+
+  /**
+   * Given a source array with shape {@link dims} and content {@link src}, copy the contents into
+   * the input Tensor with name {@link inputName}. The source array {@link src} must have at least
+   * as many elements as that of the destination Tensor. If {@link src} has more elements than the
+   * destination has capacity, the copy is truncated.
+   */
   public void feed(String inputName, double[] src, long... dims) {
     addFeed(inputName, Tensor.create(dims, DoubleBuffer.wrap(src)));
   }
@@ -268,6 +278,17 @@ public class TensorFlowInferenceInterface {
    * destination has capacity, the copy is truncated.
    */
   public void feed(String inputName, IntBuffer src, long... dims) {
+    addFeed(inputName, Tensor.create(dims, src));
+  }
+
+  /**
+   * Given a source buffer with shape {@link dims} and content {@link src}, both stored as
+   * <b>direct</b> and <b>native ordered</b> java.nio buffers, copy the contents into the input
+   * Tensor with name {@link inputName}. The source buffer {@link src} must have at least as many
+   * elements as that of the destination Tensor. If {@link src} has more elements than the
+   * destination has capacity, the copy is truncated.
+   */
+  public void feed(String inputName, LongBuffer src, long... dims) {
     addFeed(inputName, Tensor.create(dims, src));
   }
 
